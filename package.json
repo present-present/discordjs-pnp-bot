@@ -8,8 +8,8 @@
   "scripts": {
     "start:dev": "nodemon",
     "deploy:guild": "ts-node -r tsconfig-paths/register ./src/deploy-slash-commands.ts",
-    "run:dev": "ts-node -r tsconfig-paths/register ./src/index.ts",
-    "run:prod": "node -r ts-node/register/transpile-only -r tsconfig-paths/register ./dist/src/index.js",
+    "run:dev": "ts-node -r tsconfig-paths/register --files ./src/index.ts",
+    "run:prod": "node -r ts-node/register/transpile-only -r tsconfig-paths/register --files ./dist/src/index.js",
     "build": "tsc -p tsconfig.prod.json",
     "test": "jest",
     "test:watch": "jest --watch",

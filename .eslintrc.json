@@ -26,6 +26,7 @@
     "rules": {
         "prettier/prettier": "warn",
         "import/extensions": "off",
-        "no-console": "off"
+        "no-console": "off",
+        "class-methods-use-this": "off",
     }
 }

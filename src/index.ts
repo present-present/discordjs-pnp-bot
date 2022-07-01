@@ -1,34 +1,25 @@
 import dotenv from 'dotenv-safe';
-import { Client, Intents } from 'discord.js';
+import { Client, Intents, Collection } from 'discord.js';
+import commands from './commands/commands';
+import { slashCommandHandler } from './slash-command-handler';
 
 // getting token form enviroment variables
 dotenv.config();
 const token = process.env.BOT_TOKEN;
 
 // creating a new client insatnce
-const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+export const client = new Client({ intents: [Intents.FLAGS.GUILDS] });
+
+// register commands in client
+client.commands = new Collection();
+commands.forEach(command => client.commands.set(command.data.name, command));
 
 // Log for Ready
 client.once('ready', () => {
     console.log('Ready');
 });
 
-commands = []
-
-client.on('interactionCreate', async interaction => {
-    if (!interaction.isCommand()) return;
-
-    const command = client.commands.get(interaction.commandName);
-
-    if (!command) return;
-
-    try {
-        await command.execute(interaction);
-    } catch (error) {
-        console.error(error);
-        await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-    }
-});
+slashCommandHandler(client);
 
 // login with token
 client.login(token);
