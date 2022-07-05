@@ -1,7 +1,7 @@
 import dotenv from 'dotenv-safe';
 import { Client, Intents, Collection } from 'discord.js';
 import commands from './commands/commands';
-import slashCommandHandler from './handler/slash-command-handler';
+import slashCommandHandler from './handler/command-handler';
 import eventHandler from './handler/event-handler';
 
 // getting token form enviroment variables

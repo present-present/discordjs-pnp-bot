@@ -1,7 +1,8 @@
-import { SlashCommandBuilder } from "@discordjs/builders";
-import { Message } from 'discord.js';
+/* eslint-disable no-unused-vars */
+import { SlashCommandBuilder } from '@discordjs/builders';
+import { CommandInteraction } from 'discord.js';
 
 export interface ICommand {
-    data: SlashCommandBuilder
-    execute(interaction: Message): void
+    data: SlashCommandBuilder;
+    execute(interaction: CommandInteraction): void;
 }
