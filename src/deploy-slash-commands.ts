@@ -1,3 +1,5 @@
+// currently only used for development
+// prod uses gobal commands
 import { REST } from '@discordjs/rest';
 import { Routes, RESTPostAPIApplicationCommandsJSONBody } from 'discord-api-types/v9';
 import dotenv from 'dotenv-safe';
@@ -13,5 +15,5 @@ const commandsJSON: RESTPostAPIApplicationCommandsJSONBody[] = commands.map(comm
 const rest: REST = new REST({ version: '9' }).setToken(token);
 
 rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: commandsJSON })
-    .then(() => console.log('Successfully registered application commands.'))
+    .then(() => console.log('[Info] Successfully registered application (/) guild commands.'))
     .catch(console.error);
