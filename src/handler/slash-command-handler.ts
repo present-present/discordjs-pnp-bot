@@ -1,6 +1,6 @@
-import { Client } from "discord.js";
+import { Client } from 'discord.js';
 
-export function slashCommandHandler(client: Client) {
+export default function slashCommandHandler(client: Client) {
     client.on('interactionCreate', async interaction => {
         if (!interaction.isCommand()) return;
 
@@ -12,7 +12,10 @@ export function slashCommandHandler(client: Client) {
             await command.execute(interaction);
         } catch (error) {
             console.error(error);
-            await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+            await interaction.reply({
+                content: '[Error] There was an error while executing this command!',
+                ephemeral: true,
+            });
         }
     });
 }
