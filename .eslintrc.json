@@ -27,6 +27,7 @@
         "prettier/prettier": "warn",
         "import/extensions": "off",
         "no-console": "off",
-        "class-methods-use-this": "off"
+        "class-methods-use-this": "off",
+        "no-plusplus": "off"
     }
 }

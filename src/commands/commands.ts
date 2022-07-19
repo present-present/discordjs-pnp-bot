@@ -1,3 +1,3 @@
-import Ping from './ping.command';
+import Roll from './roll.command/roll.command';
 
-export default [Ping];
+export default [Roll];
