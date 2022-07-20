@@ -8,7 +8,7 @@ import throwErrorShouldBeDice from './errors/should-be-dice.error';
 // functions
 import randomNumber from '../shared/random-number';
 
-class Roll implements ICommand {
+export default class Roll implements ICommand {
     name = 'roll';
 
     description = 'roll a dice like 3d6, you can add (de)buffs like +3 or -1d4';
@@ -93,5 +93,3 @@ class Roll implements ICommand {
         await interaction.editReply(reply);
     }
 }
-
-export default new Roll();
