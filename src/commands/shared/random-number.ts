@@ -1,3 +1,3 @@
-export default async function randomNumber(max: number): Promise<number> {
+export default function randomNumber(max: number): number {
     return Math.floor(Math.random() * max + 1);
 }

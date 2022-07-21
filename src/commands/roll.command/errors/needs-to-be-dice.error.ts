@@ -1,7 +1,7 @@
 import { CommandInteraction } from 'discord.js';
-import RollCommandStringOption from '../../types/RollCommandStringOption';
+import RollCommandStringOption from '@src/commands/types/RollCommandStringOption';
 // types
-import ErrorEmbed from '../../types/ErrorEmbed';
+import ErrorEmbed from '@src/commands/types/ErrorEmbed';
 
 export default async function throwErrorShouldBeDice(
     interaction: CommandInteraction,

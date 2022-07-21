@@ -1,95 +1,143 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { CommandInteraction } from 'discord.js';
+import { ColorResolvable, CommandInteraction, MessageEmbed } from 'discord.js';
+//settings
+import settings from '@src/settings.json';
 // types
-import ICommand from '../types/ICommand';
-import CommandStringOptionRoll from '../types/RollCommandStringOption';
+import ICommand from '@src/commands/types/ICommand';
 // errors
-import throwErrorShouldBeDice from './errors/should-be-dice.error';
+import throwErrorNeedsToBeDice from '@src/commands/roll.command/errors/needs-to-be-dice.error';
 // functions
-import randomNumber from '../shared/random-number';
+import RollCommandStringOption from '@src/commands/types/RollCommandStringOption';
+import rollDice from '@src/commands/roll.command/functions/roll-dice';
+import throwErrorNeedsToBeNumber from '@src/commands/roll.command/errors/needs-to-be-number.error';
+import formatResultString from './functions/format-result-string';
+import { resultTypes } from './resultTypes';
 
 export default class Roll implements ICommand {
     name = 'roll';
 
     description = 'roll a dice like 3d6, you can add (de)buffs like +3 or -1d4';
 
-    options = {
-        dice: {
+    options: RollCommandStringOption[] = [
+        {
             name: 'dice',
             description: 'roll a dice like 3D6 or 1D20',
+            value: '',
+            needsToBeDice: true,
+            resultType: resultTypes.DEFAULT
         },
-        diceTwo: {
-            name: 'more-dice',
-            description: 'add another dice type',
-        },
-        diceThree: {
-            name: 'even-more-dice',
+        {
+            name: 'buff',
             description: 'wtf you rolling for that you need three diffrent dice types, may god be with you...',
+            value: '',
+            needsToBeDice: false,
+            resultType: resultTypes.BUFF
         },
-    };
+        {
+            name: 'debuff',
+            description: 'wtf you rolling for that you need three diffrent dice types, may god be with you...',
+            value: '',
+            needsToBeDice: false,
+            resultType: resultTypes.DEBUFF
+        },
+    ];
 
-    data = new SlashCommandBuilder()
-        .setName(this.name)
-        .setDescription(this.description)
-        .addStringOption(option =>
-            option.setName(this.options.dice.name).setDescription(this.options.dice.description).setRequired(true)
-        )
-        .addStringOption(option =>
-            option.setName(this.options.diceTwo.name).setDescription(this.options.diceTwo.description)
-        )
-        .addStringOption(option =>
-            option.setName(this.options.diceThree.name).setDescription(this.options.diceThree.description)
+    data = this.buildCommand();
+
+    buildCommand() {
+        const data = new SlashCommandBuilder().setName(this.name).setDescription(this.description);
+
+        // because only first option is required
+        data.addStringOption(stringOption =>
+            stringOption.setName(this.options[0].name).setDescription(this.options[0].description).setRequired(true)
         );
+
+        for (let i = 1; i < this.options.length; i++) {
+            data.addStringOption(stringOption =>
+                stringOption.setName(this.options[i].name).setDescription(this.options[i].description)
+            );
+        }
+
+        return data;
+    }
 
     async execute(interaction: CommandInteraction) {
         await interaction.deferReply();
 
         // fetch and process user input
-        const optionsInput: CommandStringOptionRoll[] = [];
+        const optionsInput: RollCommandStringOption[] = this.options;
 
-        const diceRegex = /^\d+[d]{1,1}\d+$/i; // regex as if string: number1 + 'd' + number2
-
-        interaction.options.data.forEach(_option => {
+        interaction.options.data.forEach(option => {
             // process user input
-            const option = new CommandStringOptionRoll();
 
-            option.name = _option.name?.toString();
-            option.value = (_option.value?.toString() as string).replace(/[d|w]/i, 'd').replace(' ', '');
-            // if user gave a dice
-            option.isDice = diceRegex.test(option.value);
-
-            // validate option
-            // the name of the option needs to contain 'dice' to be handles as one
-            if (/dice/i.test(option.name) && !option.isDice) {
-                throwErrorShouldBeDice(interaction, option);
-                return;
-            }
-
-            optionsInput.push(option);
+            // get right index
+            const index = optionsInput.findIndex(element => element.name === option.name) as number;
+            // write processed value
+            optionsInput[index].value = (option.value?.toString() as string).replace(/[d|w]/i, 'd').replace(' ', '');
         });
 
         let reply = '';
-        optionsInput.forEach(async option => {
-            let sum = 0;
+        let sum = 0;
 
-            if (option.isDice) {
+        let results: number[] = []
+
+        optionsInput.forEach(option => {
+            // validate option
+
+            // guard input does not be empty
+            if (option.value.length === 0) {
+                return;
+            }
+
+            const diceRegex = /^\d+[d]{1,1}\d+$/i; // regex as if string: number1 + 'd' + number2
+            const isDice = diceRegex.test(option.value as string);
+
+            const isFlatValue = /[0-9]/.test(option.value);
+
+            // validate if dice is given when dice is required
+            if (!isDice && option.needsToBeDice) {
+                throwErrorNeedsToBeDice(interaction, option);
+            }
+            // validate if flat number when it isnt
+            else if (!isDice && !isFlatValue) {
+                throwErrorNeedsToBeNumber(interaction, option);
+            }
+
+            if (isDice) {
                 const diceInput = option.value;
+
                 const diceCount = Number(diceInput.substring(0, diceInput.indexOf('d')));
                 const diceEyes = Number(diceInput.substring(diceInput.indexOf('d') + 1, diceInput.length));
 
-                for (let i = 0; i < diceCount; i++) {
-                    // eslint-disable-next-line no-await-in-loop
-                    const result = await randomNumber(diceEyes);
-                    reply += `D${diceEyes}: ${result}\n`;
-                    sum += result;
-                }
-            } else {
-                reply += `flat: ${option.value}\n`;
-            }
+                const diceResults = rollDice(diceCount, diceEyes);
 
-            reply += `Sum: ${sum}`;
+                diceResults.forEach(result => {
+                    results.push(result);
+
+                    const prefix = `D${diceEyes}:`;
+                    const formattedResult = formatResultString(prefix, result, option.resultType);
+                    reply += formattedResult
+                    sum += result;
+                });
+            } else {
+                const result = Number(option.value)
+                results.push(result)
+
+                const prefix = 'flat:';
+                const formattedResult = formatResultString(prefix, result, option.resultType);
+
+                reply += formattedResult;
+                sum += result;
+            }
         });
 
-        await interaction.editReply(reply);
+        // add the sum of all options, when there is more than one option
+        if (results.length > 1) {
+            reply += `---------\n` + `Sum: ${sum}`;
+        }
+
+        const embed = new MessageEmbed().setColor(settings.colours.blurple as ColorResolvable).setTitle(`${interaction}`).setDescription(`\`\`\`${reply}\`\`\``);
+
+        await interaction.editReply({ embeds: [embed] });
     }
 }
