@@ -1,7 +1,7 @@
 import { Interaction } from 'discord.js';
-import { IEvent } from './ievent';
+import { Event } from './types/event.interface';
 
-class InteractionCreate implements IEvent {
+export default class InteractionCreateEvent implements Event {
     name = 'interactionCreate';
 
     once = false;
@@ -12,5 +12,3 @@ class InteractionCreate implements IEvent {
         );
     }
 }
-
-export default new InteractionCreate();

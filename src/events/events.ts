@@ -1,7 +1,4 @@
-import Ready from './ready.event';
-import InteractionCreate from './interaction-create.event';
+import ReadyEvent from './ready.event';
+import InteractionCreateEvent from './interaction-create.event';
 
-export default [
-    Ready,
-    InteractionCreate
-];
+export default [new ReadyEvent(), new InteractionCreateEvent()];

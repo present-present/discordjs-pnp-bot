@@ -1,19 +1,15 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { ColorResolvable, CommandInteraction, MessageEmbed } from 'discord.js';
-//settings
-import settings from '@src/settings.json';
-// types
-import ICommand from '@src/commands/types/ICommand';
-// errors
 import throwErrorNeedsToBeDice from '@src/commands/roll.command/errors/needs-to-be-dice.error';
-// functions
-import RollCommandStringOption from '@src/commands/types/RollCommandStringOption';
-import rollDice from '@src/commands/roll.command/functions/roll-dice';
 import throwErrorNeedsToBeNumber from '@src/commands/roll.command/errors/needs-to-be-number.error';
+import rollDice from '@src/commands/roll.command/functions/roll-dice';
+import Command from '@src/commands/types/command.interface';
+import settings from '@src/settings.json';
+import { ColorResolvable, CommandInteraction, MessageEmbed } from 'discord.js';
 import formatResultString from './functions/format-result-string';
-import { resultTypes } from './resultTypes';
+import { ResultTypes } from './types/result-types.enum';
+import RollCommandStringOption from './types/roll-command-string-options.interface';
 
-export default class Roll implements ICommand {
+export default class Roll implements Command {
     name = 'roll';
 
     description = 'roll a dice like 3d6, you can add (de)buffs like +3 or -1d4';
@@ -24,37 +20,46 @@ export default class Roll implements ICommand {
             description: 'roll a dice like 3D6 or 1D20',
             value: '',
             needsToBeDice: true,
-            resultType: resultTypes.DEFAULT
+            resultType: ResultTypes.DEFAULT,
         },
         {
             name: 'buff',
-            description: 'wtf you rolling for that you need three diffrent dice types, may god be with you...',
+            description:
+                'wtf you rolling for that you need three diffrent dice types, may god be with you...',
             value: '',
             needsToBeDice: false,
-            resultType: resultTypes.BUFF
+            resultType: ResultTypes.BUFF,
         },
         {
             name: 'debuff',
-            description: 'wtf you rolling for that you need three diffrent dice types, may god be with you...',
+            description:
+                'wtf you rolling for that you need three diffrent dice types, may god be with you...',
             value: '',
             needsToBeDice: false,
-            resultType: resultTypes.DEBUFF
+            resultType: ResultTypes.DEBUFF,
         },
     ];
 
     data = this.buildCommand();
 
     buildCommand() {
-        const data = new SlashCommandBuilder().setName(this.name).setDescription(this.description);
+        const data = new SlashCommandBuilder()
+            .setName(this.name)
+            .setDescription(this.description);
 
         // because only first option is required
         data.addStringOption(stringOption =>
-            stringOption.setName(this.options[0].name).setDescription(this.options[0].description).setRequired(true)
+            stringOption
+                .setName(this.options[0].name)
+                .setDescription(this.options[0].description)
+                .setRequired(true)
         );
 
         for (let i = 1; i < this.options.length; i++) {
             data.addStringOption(stringOption =>
-                stringOption.setName(this.options[i].name).setDescription(this.options[i].description)
+                stringOption
+                    .setName(this.options[i].name)
+                    .setDescription(this.options[i].description)
             );
         }
 
@@ -71,15 +76,19 @@ export default class Roll implements ICommand {
             // process user input
 
             // get right index
-            const index = optionsInput.findIndex(element => element.name === option.name) as number;
+            const index = optionsInput.findIndex(
+                element => element.name === option.name
+            ) as number;
             // write processed value
-            optionsInput[index].value = (option.value?.toString() as string).replace(/[d|w]/i, 'd').replace(' ', '');
+            optionsInput[index].value = (option.value?.toString() as string)
+                .replace(/[d|w]/i, 'd')
+                .replace(' ', '');
         });
 
         let reply = '';
         let sum = 0;
 
-        let results: number[] = []
+        const results: number[] = [];
 
         optionsInput.forEach(option => {
             // validate option
@@ -106,8 +115,15 @@ export default class Roll implements ICommand {
             if (isDice) {
                 const diceInput = option.value;
 
-                const diceCount = Number(diceInput.substring(0, diceInput.indexOf('d')));
-                const diceEyes = Number(diceInput.substring(diceInput.indexOf('d') + 1, diceInput.length));
+                const diceCount = Number(
+                    diceInput.substring(0, diceInput.indexOf('d'))
+                );
+                const diceEyes = Number(
+                    diceInput.substring(
+                        diceInput.indexOf('d') + 1,
+                        diceInput.length
+                    )
+                );
 
                 const diceResults = rollDice(diceCount, diceEyes);
 
@@ -115,16 +131,24 @@ export default class Roll implements ICommand {
                     results.push(result);
 
                     const prefix = `D${diceEyes}:`;
-                    const formattedResult = formatResultString(prefix, result, option.resultType);
-                    reply += formattedResult
+                    const formattedResult = formatResultString(
+                        prefix,
+                        result,
+                        option.resultType
+                    );
+                    reply += formattedResult;
                     sum += result;
                 });
             } else {
-                const result = Number(option.value)
-                results.push(result)
+                const result = Number(option.value);
+                results.push(result);
 
                 const prefix = 'flat:';
-                const formattedResult = formatResultString(prefix, result, option.resultType);
+                const formattedResult = formatResultString(
+                    prefix,
+                    result,
+                    option.resultType
+                );
 
                 reply += formattedResult;
                 sum += result;
@@ -136,8 +160,13 @@ export default class Roll implements ICommand {
             reply += `---------\n` + `Sum: ${sum}`;
         }
 
-        const embed = new MessageEmbed().setColor(settings.colours.blurple as ColorResolvable).setTitle(`${interaction}`).setDescription(`\`\`\`${reply}\`\`\``);
+        const embed = new MessageEmbed()
+            .setColor(settings.colours.blurple as ColorResolvable)
+            .setTitle(`${interaction}`)
+            .setDescription(`\`\`\`${reply}\`\`\``);
 
-        await interaction.editReply({ embeds: [embed] });
+        await interaction.editReply({
+            embeds: [embed],
+        });
     }
 }

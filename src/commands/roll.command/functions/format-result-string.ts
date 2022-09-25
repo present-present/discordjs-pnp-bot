@@ -1,20 +1,19 @@
-import { resultTypes } from "@src/commands/roll.command/resultTypes";
+import { ResultTypes } from '@src/commands/roll.command/types/result-types.enum';
 
-export default function formatResultString(prefix: string, result: number, resultType: any): string {
-    
-    console.log(typeof resultType);
-
-    switch(resultType) {
-        case resultTypes.BUFF: {
+export default function formatResultString(
+    prefix: string,
+    result: number,
+    resultType: ResultTypes
+): string {
+    switch (resultType) {
+        case ResultTypes.BUFF: {
             return `${prefix} +${result}\n`;
-            break;
         }
-        case resultTypes.DEBUFF: {
+        case ResultTypes.DEBUFF: {
             return `${prefix} -${result}\n`;
-            break;
         }
         default: {
             return `${prefix} ${result}\n`;
         }
-      } 
+    }
 }

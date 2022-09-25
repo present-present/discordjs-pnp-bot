@@ -1,7 +1,7 @@
 import { Client } from 'discord.js';
-import { IEvent } from './ievent';
+import { Event } from './types/event.interface';
 
-class Ready implements IEvent {
+export default class ReadyEvent implements Event {
     name = 'ready';
 
     once = true;
@@ -10,5 +10,3 @@ class Ready implements IEvent {
         console.log(`[Event] Ready: Logged in as ${client.user?.tag}`);
     }
 }
-
-export default new Ready();

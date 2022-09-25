@@ -3,6 +3,8 @@ import { ColorResolvable, MessageEmbed } from 'discord.js';
 import settings from '../../settings.json';
 
 const ErrorEmbed = new MessageEmbed();
-ErrorEmbed.setColor(settings.colours.red as ColorResolvable).setTitle('❌  Error');
+ErrorEmbed.setColor(settings.colours.red as ColorResolvable).setTitle(
+    '❌  Error'
+);
 
 export default ErrorEmbed;

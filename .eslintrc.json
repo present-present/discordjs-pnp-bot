@@ -5,8 +5,6 @@
         "jest": true
     },
     "extends": [
-        "airbnb-base",
-        "airbnb-typescript/base",
         "plugin:@typescript-eslint/recommended",
         "plugin:eslint-comments/recommended",
         "plugin:jest/recommended",
@@ -15,7 +13,7 @@
     ],
     "parser": "@typescript-eslint/parser",
     "parserOptions": {
-        "project": "./tsconfig.eslint.json"
+        "project": "./tsconfig.json"
     },
     "plugins": [
         "@typescript-eslint",
@@ -26,9 +24,7 @@
         "prettier"
     ],
     "rules": {
-        "prettier/prettier": "error",
-        "import/prefer-default-export": "off",
-        "import/no-default-export": "error",
+        "prettier/prettier": "warn",
         "no-use-before-define": [
             "error",
             {
@@ -37,7 +33,6 @@
                 "variables": true
             }
         ],
-        "@typescript-eslint/explicit-function-return-type": "off",
         "@typescript-eslint/no-use-before-define": [
             "error",
             {
@@ -46,8 +41,7 @@
                 "variables": true,
                 "typedefs": true
             }
-        ],
-        "import/no-extraneous-dependencies": "off"
+        ]
     },
     "settings": {
         "import/resolver": {
